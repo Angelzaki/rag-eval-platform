@@ -1,0 +1,7 @@
+Requisitos del producto A2
+
+A2 requiere autenticación SSO corporativo y MFA obligatorio.
+El volumen mínimo de licencias es 50 usuarios activos.
+La integración con el ERP debe usar la API v3 documentada.
+El tiempo de respuesta objetivo del servicio es menor a 300 ms en p95.
+A2 no incluye módulo de facturación electrónica en la versión base.

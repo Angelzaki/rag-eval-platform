@@ -1,0 +1,5 @@
+Guía de incidentes corpus B
+
+Severidad 1: impacto total del servicio, escalamiento inmediato.
+Severidad 2: degradación parcial, respuesta en menos de 2 horas.
+Usado solo para simular crecimiento del corpus en evaluación comparativa.

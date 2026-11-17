@@ -1,0 +1,6 @@
+Límite comercial vigente
+
+El límite comercial mensual por cuenta es de S/ 250,000.
+Exceder el límite requiere aprobación del comité de riesgo.
+Las excepciones temporales no pueden superar 15 días calendario.
+El monitoreo del límite se actualiza cada noche a las 23:00 hora Lima.

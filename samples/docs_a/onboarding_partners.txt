@@ -1,0 +1,5 @@
+Onboarding de partners
+
+El alta de un partner requiere NDA firmado y checklist de seguridad aprobado.
+La rotación de claves se ejecuta cada 90 días.
+El cifrado en tránsito es obligatorio en todos los endpoints expuestos.

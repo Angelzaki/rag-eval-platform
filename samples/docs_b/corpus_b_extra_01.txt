@@ -1,0 +1,5 @@
+Anexo operativo corpus B
+
+Procedimiento de onboarding remoto para partners.
+Checklist de seguridad: cifrado en tránsito, rotación de claves cada 90 días.
+Este documento amplía el corpus para escenarios A/B de evaluación.

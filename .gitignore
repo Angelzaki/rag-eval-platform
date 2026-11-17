@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+results/*.json
+results/*.md
+results/*.html
+results/*_regression.json
+!results/.gitkeep
+.pytest_cache/
+.mypy_cache/
+dist/
+*.egg-info/
+.DS_Store
