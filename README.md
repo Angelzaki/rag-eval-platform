@@ -6,7 +6,20 @@
 
 `extracción → chunking → retrieval → ground truth → faithfulness → citas → abstención`
 
+<br/>
+<img src="docs/diagram.jpg" alt="Problema → Solución → Resultado" width="100%"/>
+
 </div>
+
+---
+
+### `$ cat diagrama.md`
+
+```mermaid
+flowchart LR
+  P[Problema<br/>Corpus crece y nadie sabe dónde falla] --> S[Solución<br/>7 suites + Ground Truth + baseline]
+  S --> R[Resultado<br/>Detecta etapa rota y regresiones]
+```
 
 ---
 
