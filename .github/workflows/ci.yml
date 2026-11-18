@@ -19,6 +19,10 @@ jobs:
         run: pytest -q
       - name: Eval scenario_a
         run: python -m rag_eval --scenario scenario_a
+      - name: llm-ci-gates (PASS)
+        run: |
+          pip install "git+https://github.com/Angelzaki/llm-ci-gates.git"
+          python -m llm_ci_gates --metrics results/scenario_a.json --thresholds ci/thresholds.yaml
       - name: Upload metrics
         uses: actions/upload-artifact@v4
         with:
