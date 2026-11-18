@@ -1,0 +1,20 @@
+services:
+  eval:
+    build: .
+    volumes:
+      - ./results:/app/results
+      - ./samples:/app/samples:ro
+    command: ["--scenario", "scenario_a"]
+
+  eval-b:
+    build: .
+    profiles: ["ab"]
+    volumes:
+      - ./results:/app/results
+      - ./samples:/app/samples:ro
+    command: ["--scenario", "scenario_b"]
+
+  test:
+    build: .
+    profiles: ["test"]
+    entrypoint: ["pytest", "-q"]

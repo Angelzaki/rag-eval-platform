@@ -2,7 +2,7 @@
 
 # rag-eval-platform
 
-**Evaluación local de sistemas RAG** · Angel Salazar
+**Evaluación local de sistemas RAG** · Angel Salazar · Nivel 3
 
 `extracción → chunking → retrieval → ground truth → faithfulness → citas → abstención`
 
@@ -21,70 +21,50 @@ flowchart LR
   S --> R[Resultado<br/>Detecta etapa rota y regresiones]
 ```
 
+Arquitectura completa: [`docs/architecture.md`](docs/architecture.md)
+
 ---
 
 ### `$ cat problema.md`
 
-En sistemas RAG reales el dolor no es “que el modelo no suene inteligente”.  
-El dolor aparece cuando el corpus crece (de pocos docs a +100 PDF) y nadie sabe **en qué etapa se rompió**.
+En sistemas RAG reales el dolor no es “que el modelo suene inteligente”.  
+El dolor aparece cuando el corpus crece y nadie sabe **en qué etapa se rompió**.
 
-Problemas que atacamos:
-
-| Problema | Qué pasa en la práctica | Cómo lo atacamos aquí |
+| Problema | En la práctica | Aquí |
 |---|---|---|
-| Evaluación superficial | Se prueban 3 preguntas a mano y “parece bien” | Ground Truth + suites reproducibles |
-| Caja negra del pipeline | Falla el producto, pero no sabes si fue extract/chunk/retrieve/generate | 7 suites por etapa |
-| Alucinaciones | Responde con seguridad sin respaldo documental | Faithfulness + citation |
-| No sabe callarse | Inventa cuando no hay evidencia | Abstention test |
-| Regresiones silenciosas | Una “mejora” empeora retrieval y nadie lo nota | Baseline + comparación A/B |
-| Cambio de modelo a ciegas | Se cambia Haiku→Sonnet sin métrica | Primero medir, después cambiar LLM |
+| Evaluación superficial | 3 preguntas a mano | Ground Truth + 7 suites |
+| Caja negra | Falla el producto sin saber si fue extract/chunk/retrieve | Suites por etapa |
+| Alucinaciones | Responde sin respaldo | Faithfulness + citation |
+| No sabe callarse | Inventa sin evidencia | Abstention |
+| Regresiones | Una “mejora” empeora retrieval | Baseline + A/B |
 
-En corto: convertir pruebas RAG en **ingeniería de evaluación**, no en demos.
-
----
-
-### `$ whoami`
-
-```text
-objetivo: detectar dónde se rompe el RAG cuando el corpus crece
-no_objetivo: "el modelo responde bonito"
-modo: 100% local · sin cloud · sin API keys obligatorias
-autor: Angel Salazar · Lima
-```
+**Hipótesis:** con GT fijo y baseline, un cambio de corpus o de chunking deja evidencia medible (no opinión).
 
 ---
 
-### `$ ./pipeline.sh --eval`
+### `$ cat experimento.md`
 
-```text
-samples/docs_*  +  questions.jsonl (20)
-        │
-        ▼
-   7 suites medibles
-        │
-        ▼
- results/*.json + *.md + *.html
-        │
-        ▼
- baseline.json → regresión automática
-```
+Detalle: [`docs/EXPERIMENT.md`](docs/EXPERIMENT.md)
 
-| Suite | Qué valida |
-|---|---|
-| `extraction` | ¿los documentos se leen bien? |
-| `chunking` | ¿la fragmentación pierde contexto? |
-| `retrieval` | ¿el top-k trae el doc fuente? |
-| `ground_truth` | ¿la respuesta se acerca a lo esperado? |
-| `faithfulness` | ¿hay claims sin respaldo? |
-| `citation` | ¿las citas apuntan al documento correcto? |
-| `abstention` | ¿se abstiene cuando no hay evidencia? |
+| | scenario_a (4 docs) | scenario_b (6 docs) | Delta |
+|---|---:|---:|---:|
+| overall | **89.7%** | **97.7%** | +8 |
+| ground_truth | 83% | 100% | +17 |
+| faithfulness | 89% | 100% | +11 |
+| citation | 83% | 100% | +17 |
+| abstention | 85% | 83% | -2 |
 
-Escenarios:
+Más docs no es gratis: sube calidad de respuesta en este sample, pero abstención puede aflojar.
 
-- **scenario_a** → corpus actual (`samples/docs_a`)
-- **scenario_b** → corpus ampliado (`samples/docs_b`)
+---
 
-Así se simula el salto de “pocos docs” a “corpus más grande” y se mide el impacto.
+### `$ cat conclusions.md`
+
+Detalle: [`docs/CONCLUSIONS.md`](docs/CONCLUSIONS.md)
+
+- Aprobaría: gate por suite + baseline obligatorio antes de merge.
+- Rechazaría: demos manuales y cambiar de modelo sin rerun.
+- Contrato de salida: JSON en `results/` consumible por [`llm-ci-gates`](https://github.com/Angelzaki/llm-ci-gates).
 
 ---
 
@@ -92,7 +72,7 @@ Así se simula el salto de “pocos docs” a “corpus más grande” y se mide
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\activate   # Windows
 pip install -e .
 pytest
 python -m rag_eval --scenario scenario_a --save-baseline
@@ -100,29 +80,37 @@ python -m rag_eval --scenario scenario_a
 python scripts/compare_ab.py
 ```
 
----
+Docker:
 
-### `$ cat decision.md`
-
-Flujo que buscamos:
-
-```text
-proponer cambio (chunking / retrieval / prompt / modelo)
-        │
-        ▼
-correr suites + comparar vs baseline
-        │
-        ▼
-aprobar / corregir / rechazar con evidencia
+```bash
+docker compose run --rm eval
+docker compose --profile test run --rm test
 ```
 
-Sin Ground Truth y sin métricas, cualquier “mejora” es opinión.
+CI: `.github/workflows/ci.yml` → pytest + eval + artifact de `results/`.
+
+---
+
+### `$ cat aws.md` (referencia, sin credenciales)
+
+```text
+GitHub Actions → métricas JSON
+       │
+       ▼
+ llm-ci-gates (PASS/FAIL)
+       │
+       └── opcional: ECR + ECS batch + S3 results
+```
+
+Datos solo sintéticos en `samples/`. Cero documentos internos.
 
 ---
 
 ### `$ ls related`
 
-`local-rag-pipeline` · `retrieval-tuner-local` · `abstention-lab-local` · `eval-hub-local`
+**Ecosistema:** [`llm-ci-gates`](https://github.com/Angelzaki/llm-ci-gates) · [`knowledge-ops-console`](https://github.com/Angelzaki/knowledge-ops-console) · [`local-rag-pipeline`](https://github.com/Angelzaki/local-rag-pipeline)
+
+**Labs satélite:** `chunk-lab` · `retrieval-tuner-local` · `abstention-lab-local` · `faithfulness-guard` · `citation-auditor-local` · `eval-hub-local`
 
 ---
 
